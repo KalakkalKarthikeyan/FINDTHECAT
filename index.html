@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find The Cat - 3D Maze</title>
+    <title>Find The Cat - Maze Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <canvas id="miniMap"></canvas>
-    </div>
+    <h1>🐱 Find The Cat 🐱</h1>
+    <p>Select a level:</p>
+    <button onclick="startGame('easy')">Easy</button>
+    <button onclick="startGame('normal')">Normal</button>
+    <button onclick="startGame('hard')">Hard</button>
+    <button onclick="startGame('vasanth')">Vasanth</button>
+    <br><br>
+    <label for="bgImage">Background Image URL:</label>
+    <input type="text" id="bgImage" placeholder="Paste image URL here">
+    <button onclick="changeBackground()">Set Background</button>
+    <br><br>
+    <canvas id="gameCanvas"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
