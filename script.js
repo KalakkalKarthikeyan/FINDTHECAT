@@ -64,6 +64,7 @@ function drawMaze() {
     
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]); // Dotted line pattern
 
     for (let y = 0; y < mazeSize; y++) {
         for (let x = 0; x < mazeSize; x++) {
@@ -83,6 +84,8 @@ function drawMaze() {
             }
         }
     }
+
+    ctx.setLineDash([]); // Reset to solid lines
 
     // Draw player
     ctx.fillStyle = "blue";
@@ -119,4 +122,3 @@ function checkWin() {
         document.getElementById("winMessage").style.display = "block";
     }
 }
-
