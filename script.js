@@ -1,145 +1,132 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-let player = { x: 1, y: 1 };
-let cat = { x: 0, y: 0 };
+const miniMap = document.getElementById("miniMap");
+const miniCtx = miniMap.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const TILE_SIZE = 40;
+const MAZE_SIZE = 15;  // Increase for harder mazes
 let maze = [];
-let mazeSize = 10;
-let tileSize = 40;
-let gameRunning = false;
-let backgroundImage = new Image();
-backgroundImage.src = "YOUR_BACKGROUND_IMAGE_URL_HERE"; // Change this
+let player = { x: 1, y: 1, angle: 0 };
+let cat = { x: MAZE_SIZE - 2, y: MAZE_SIZE - 2 };
 
-const levelSettings = {
-    easy: { size: 10 },
-    normal: { size: 15 },
-    hard: { size: 20 },
-    vasanth: { size: 35 } // Hardest level
-};
-
-function startGame(difficulty) {
-    mazeSize = levelSettings[difficulty].size;
-    tileSize = Math.min(600 / mazeSize, 40);
-    canvas.width = mazeSize * tileSize;
-    canvas.height = mazeSize * tileSize;
-    
-    document.getElementById("menu").style.display = "none";
-    canvas.style.display = "block";
-
-    generateMaze();
-    placeCat();
-    player = { x: 1, y: 1 };
-    gameRunning = true;
-    drawMaze();
-}
-
+// 🎲 Generate a perfect maze using recursive backtracking
 function generateMaze() {
-    maze = Array.from({ length: mazeSize }, () =>
-        Array(mazeSize).fill(1) // Start with walls
-    );
-
-    let stack = [{ x: 1, y: 1 }];
-    maze[1][1] = 0;
-
-    let directions = [
-        { x: 0, y: -2 },
-        { x: 0, y: 2 },
-        { x: -2, y: 0 },
-        { x: 2, y: 0 }
-    ];
-
-    while (stack.length > 0) {
-        let current = stack.pop();
-        directions.sort(() => Math.random() - 0.5); // Shuffle directions
-
-        for (let dir of directions) {
-            let nx = current.x + dir.x;
-            let ny = current.y + dir.y;
-
-            if (nx > 0 && ny > 0 && nx < mazeSize - 1 && ny < mazeSize - 1 && maze[ny][nx] === 1) {
-                maze[ny][nx] = 0;
-                maze[current.y + dir.y / 2][current.x + dir.x / 2] = 0;
-                stack.push({ x: nx, y: ny });
+    maze = Array.from({ length: MAZE_SIZE }, () => Array(MAZE_SIZE).fill(1));
+    
+    function carve(x, y) {
+        maze[y][x] = 0;
+        const directions = [[0,1], [1,0], [0,-1], [-1,0]].sort(() => Math.random() - 0.5);
+        for (const [dx, dy] of directions) {
+            const nx = x + dx * 2, ny = y + dy * 2;
+            if (nx > 0 && ny > 0 && nx < MAZE_SIZE - 1 && ny < MAZE_SIZE - 1 && maze[ny][nx] === 1) {
+                maze[y + dy][x + dx] = 0;
+                carve(nx, ny);
             }
         }
     }
-
-    maze[1][1] = 0;
-    maze[mazeSize - 2][mazeSize - 2] = 0;
+    
+    carve(1, 1);
+    maze[cat.y][cat.x] = 0; // Ensure cat position is clear
 }
 
-function placeCat() {
-    cat.x = mazeSize - 2;
-    cat.y = mazeSize - 2;
-}
+generateMaze();
 
-function drawMaze() {
+// 📏 Raycasting Function for 3D Rendering
+function castRays() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background image
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    const FOV = Math.PI / 3;
+    const NUM_RAYS = 120;
+    const SLICE_WIDTH = canvas.width / NUM_RAYS;
+    
+    for (let i = 0; i < NUM_RAYS; i++) {
+        let angle = player.angle - FOV / 2 + (FOV / NUM_RAYS) * i;
+        let dist = 0;
+        let hitWall = false;
 
-    // Draw walls as lines
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 3;
-    for (let y = 0; y < mazeSize; y++) {
-        for (let x = 0; x < mazeSize; x++) {
-            if (maze[y][x] === 1) {
-                if (y > 0 && maze[y - 1][x] === 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(x * tileSize, y * tileSize);
-                    ctx.lineTo((x + 1) * tileSize, y * tileSize);
-                    ctx.stroke();
-                }
-                if (x > 0 && maze[y][x - 1] === 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(x * tileSize, y * tileSize);
-                    ctx.lineTo(x * tileSize, (y + 1) * tileSize);
-                    ctx.stroke();
-                }
-            }
+        let rayX = player.x;
+        let rayY = player.y;
+
+        while (!hitWall && dist < MAZE_SIZE) {
+            rayX += Math.cos(angle) * 0.1;
+            rayY += Math.sin(angle) * 0.1;
+            dist += 0.1;
+            if (maze[Math.floor(rayY)][Math.floor(rayX)] === 1) hitWall = true;
         }
+
+        const wallHeight = Math.min(canvas.height / (dist * 0.5), canvas.height);
+        const color = `rgb(50, 205, 50)`; // Parrot Green Walls
+
+        ctx.fillStyle = color;
+        ctx.fillRect(i * SLICE_WIDTH, (canvas.height - wallHeight) / 2, SLICE_WIDTH, wallHeight);
     }
 
-    // Draw player
-    ctx.fillStyle = "blue";
-    ctx.fillRect(player.x * tileSize + 5, player.y * tileSize + 5, tileSize - 10, tileSize - 10);
+    // Draw floor & sky
+    ctx.fillStyle = "lightblue"; // Sky Color
+    ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
 
-    // Draw cat emoji
-    ctx.font = `${tileSize}px Arial`;
-    ctx.fillText("🐈", cat.x * tileSize + 5, cat.y * tileSize + tileSize - 5);
+    ctx.fillStyle = "#E0D6B8"; // Light Floor Color
+    ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
 }
 
-document.addEventListener("keydown", (event) => {
-    if (!gameRunning) return;
+// 🎥 Mini-Map
+function drawMiniMap() {
+    miniCtx.clearRect(0, 0, miniMap.width, miniMap.height);
+    
+    const scale = miniMap.width / MAZE_SIZE;
+    
+    for (let y = 0; y < MAZE_SIZE; y++) {
+        for (let x = 0; x < MAZE_SIZE; x++) {
+            miniCtx.fillStyle = maze[y][x] === 1 ? "black" : "white";
+            miniCtx.fillRect(x * scale, y * scale, scale, scale);
+        }
+    }
+    
+    // Player Position
+    miniCtx.fillStyle = "blue";
+    miniCtx.fillRect(player.x * scale, player.y * scale, scale, scale);
+    
+    // Cat Position
+    miniCtx.fillStyle = "orange";
+    miniCtx.fillRect(cat.x * scale, cat.y * scale, scale, scale);
+}
 
-    let newX = player.x;
-    let newY = player.y;
+// 🎮 Movement Controls
+document.addEventListener("keydown", (e) => {
+    let newX = player.x, newY = player.y;
 
-    if (event.key === "ArrowUp") newY--;
-    if (event.key === "ArrowDown") newY++;
-    if (event.key === "ArrowLeft") newX--;
-    if (event.key === "ArrowRight") newX++;
+    if (e.key === "ArrowUp") {
+        newX += Math.cos(player.angle) * 0.5;
+        newY += Math.sin(player.angle) * 0.5;
+    }
+    if (e.key === "ArrowDown") {
+        newX -= Math.cos(player.angle) * 0.5;
+        newY -= Math.sin(player.angle) * 0.5;
+    }
+    if (e.key === "ArrowLeft") player.angle -= 0.1;
+    if (e.key === "ArrowRight") player.angle += 0.1;
 
-    if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize && maze[newY][newX] === 0) {
+    if (maze[Math.floor(newY)][Math.floor(newX)] === 0) {
         player.x = newX;
         player.y = newY;
     }
 
-    drawMaze();
-    checkWin();
+    if (Math.floor(player.x) === cat.x && Math.floor(player.y) === cat.y) {
+        alert("🎉 You found the cat!");
+        generateMaze();
+        player = { x: 1, y: 1, angle: 0 };
+    }
 });
 
-function checkWin() {
-    if (player.x === cat.x && player.y === cat.y) {
-        gameRunning = false;
-        document.getElementById("game-over").style.display = "block";
-    }
+function gameLoop() {
+    castRays();
+    drawMiniMap();
+    requestAnimationFrame(gameLoop);
 }
 
-function restartGame() {
-    document.getElementById("game-over").style.display = "none";
-    document.getElementById("menu").style.display = "block";
-    canvas.style.display = "none";
-}
+gameLoop();
 
