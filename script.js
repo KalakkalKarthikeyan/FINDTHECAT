@@ -9,9 +9,9 @@ let tileSize = 40;
 let gameRunning = false;
 
 const levelSettings = {
-    easy: { size: 10 },
-    normal: { size: 15 },
-    hard: { size: 20 },
+    easy: { size: 15 },
+    normal: { size: 25 },
+    hard: { size: 30 },
     vasanth: { size: 35 } // Hardest level
 };
 
