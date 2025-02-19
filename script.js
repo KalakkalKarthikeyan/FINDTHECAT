@@ -15,7 +15,7 @@ const levelSettings = {
     easy: { size: 10, trapCat: true },
     normal: { size: 15, trapCat: false },
     hard: { size: 20, trapCat: true },
-    vasanth: { size: 35, trapCat: false } // Hardest level
+    vasanth: { size: 35, trapCat: false }
 };
 
 function startGame(difficulty) {
@@ -44,7 +44,6 @@ function generateMaze(trapCat) {
 
     // Place the cat
     if (trapCat) {
-        // Trap the cat inside walls
         let cx = Math.floor(mazeSize / 2);
         let cy = Math.floor(mazeSize / 2);
         maze[cx][cy] = 0;
@@ -56,7 +55,6 @@ function generateMaze(trapCat) {
         maze[cx][cy - 1] = 1;
         maze[cx][cy + 1] = 1;
     } else {
-        // Place the cat at the end with an open path
         cat.x = mazeSize - 2;
         cat.y = mazeSize - 2;
         maze[cat.y][cat.x] = 0;
@@ -66,16 +64,23 @@ function generateMaze(trapCat) {
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background image
+    // Draw background image first
     if (backgroundImage) {
         let bg = new Image();
         bg.src = backgroundImage;
-        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+        bg.onload = () => {
+            ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+            drawMazeWalls();  // Ensure walls are drawn after background
+        };
+    } else {
+        drawMazeWalls(); // If no background, just draw walls
     }
+}
 
-    // Draw maze walls
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
+// Function to draw walls
+function drawMazeWalls() {
+    ctx.strokeStyle = "black"; // Darker color for visibility
+    ctx.lineWidth = 3; // Thicker lines
 
     for (let y = 0; y < mazeSize; y++) {
         for (let x = 0; x < mazeSize; x++) {
@@ -126,3 +131,4 @@ function restartGame() {
     document.getElementById("menu").style.display = "block";
     canvas.style.display = "none";
 }
+
