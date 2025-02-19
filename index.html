@@ -14,11 +14,13 @@
     <button onclick="startGame('hard')">Hard</button>
     <button onclick="startGame('vasanth')">Vasanth</button>
     <br><br>
-    <label for="bgImage">Background Image URL:</label>
-    <input type="text" id="bgImage" placeholder="Paste image URL here">
-    <button onclick="changeBackground()">Set Background</button>
-    <br><br>
-    <canvas id="gameCanvas"></canvas>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <p id="winMessage">🎉 You found the cat! 🎉</p>
+
     <script src="script.js"></script>
 </body>
 </html>
