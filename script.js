@@ -8,11 +8,14 @@ let mazeSize = 10;
 let tileSize = 40;
 let gameRunning = false;
 
+// Set your background image link here
+const backgroundImage = "your-image-link-here";  
+
 const levelSettings = {
-    easy: { size: 10 },
-    normal: { size: 15 },
-    hard: { size: 20 },
-    vasanth: { size: 35 } // Hardest level
+    easy: { size: 10, trapCat: true },
+    normal: { size: 15, trapCat: false },
+    hard: { size: 20, trapCat: true },
+    vasanth: { size: 35, trapCat: false } // Hardest level
 };
 
 function startGame(difficulty) {
@@ -21,62 +24,73 @@ function startGame(difficulty) {
     canvas.width = mazeSize * tileSize;
     canvas.height = mazeSize * tileSize;
     
-    document.getElementById("winMessage").style.display = "none";
+    document.getElementById("menu").style.display = "none";
+    canvas.style.display = "block";
 
-    generateMaze();
-    placeCat();
+    generateMaze(levelSettings[difficulty].trapCat);
     player = { x: 1, y: 1 };
     gameRunning = true;
     drawMaze();
 }
 
-function generateMaze() {
-    maze = Array.from({ length: mazeSize }, () => Array(mazeSize).fill(1));
-    
-    function carvePath(x, y) {
-        maze[y][x] = 0;
-        let directions = [
-            { dx: 0, dy: -1 }, { dx: 0, dy: 1 },
-            { dx: -1, dy: 0 }, { dx: 1, dy: 0 }
-        ];
-        directions.sort(() => Math.random() - 0.5);
+function generateMaze(trapCat) {
+    // Create random maze
+    maze = Array.from({ length: mazeSize }, () =>
+        Array.from({ length: mazeSize }, () => (Math.random() > 0.3 ? 0 : 1))
+    );
 
-        for (let { dx, dy } of directions) {
-            let nx = x + dx * 2, ny = y + dy * 2;
-            if (nx > 0 && ny > 0 && nx < mazeSize - 1 && ny < mazeSize - 1 && maze[ny][nx] === 1) {
-                maze[y + dy][x + dx] = 0;
-                carvePath(nx, ny);
-            }
-        }
+    // Ensure player start position is open
+    maze[1][1] = 0;
+
+    // Place the cat
+    if (trapCat) {
+        // Trap the cat inside walls
+        let cx = Math.floor(mazeSize / 2);
+        let cy = Math.floor(mazeSize / 2);
+        maze[cx][cy] = 0;
+        cat = { x: cx, y: cy };
+
+        // Surround the cat with walls
+        maze[cx - 1][cy] = 1;
+        maze[cx + 1][cy] = 1;
+        maze[cx][cy - 1] = 1;
+        maze[cx][cy + 1] = 1;
+    } else {
+        // Place the cat at the end with an open path
+        cat.x = mazeSize - 2;
+        cat.y = mazeSize - 2;
+        maze[cat.y][cat.x] = 0;
     }
-    
-    carvePath(1, 1);
-    maze[mazeSize - 2][mazeSize - 2] = 0;
-}
-
-function placeCat() {
-    cat.x = mazeSize - 2;
-    cat.y = mazeSize - 2;
 }
 
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw background image
+    if (backgroundImage) {
+        let bg = new Image();
+        bg.src = backgroundImage;
+        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+    }
+
+    // Draw maze walls
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+
     for (let y = 0; y < mazeSize; y++) {
         for (let x = 0; x < mazeSize; x++) {
             if (maze[y][x] === 1) {
-                ctx.fillStyle = "black"; // Small block walls
-                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
             }
         }
     }
 
     // Draw player
     ctx.fillStyle = "blue";
-    ctx.fillRect(player.x * tileSize + 5, player.y * tileSize + 5, tileSize - 10, tileSize - 10);
+    ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
 
-    // Draw cat emoji
-    ctx.font = `${tileSize * 0.8}px Arial`;
+    // Draw cat (🐈)
+    ctx.font = `${tileSize}px Arial`;
     ctx.fillText("🐈", cat.x * tileSize + 5, cat.y * tileSize + tileSize - 5);
 }
 
@@ -103,7 +117,12 @@ document.addEventListener("keydown", (event) => {
 function checkWin() {
     if (player.x === cat.x && player.y === cat.y) {
         gameRunning = false;
-        document.getElementById("winMessage").style.display = "block";
+        document.getElementById("game-over").style.display = "block";
     }
 }
 
+function restartGame() {
+    document.getElementById("game-over").style.display = "none";
+    document.getElementById("menu").style.display = "block";
+    canvas.style.display = "none";
+}
