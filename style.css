@@ -1,40 +1,28 @@
 body {
-    text-align: center;
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    margin: 0;
+    overflow: hidden;
+    background: lightblue; /* Sky Color */
 }
 
-#menu {
-    margin-top: 50px;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin: 5px;
-    cursor: pointer;
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
 }
 
 #gameCanvas {
-    display: none;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#miniMap {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.7);
     border: 2px solid black;
-    background-color: white;
-    margin-top: 20px;
 }
 
-#game-over {
-    display: none;
-    margin-top: 20px;
-}
-
-#game-over h2 {
-    font-size: 24px;
-    color: green;
-}
-
-#game-over button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin-top: 10px;
-    cursor: pointer;
-}
