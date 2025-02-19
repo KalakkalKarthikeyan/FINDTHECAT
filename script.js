@@ -61,31 +61,15 @@ function placeCat() {
 
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]); // Dotted line pattern
 
     for (let y = 0; y < mazeSize; y++) {
         for (let x = 0; x < mazeSize; x++) {
             if (maze[y][x] === 1) {
-                if (x > 0 && maze[y][x - 1] === 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(x * tileSize, y * tileSize);
-                    ctx.lineTo(x * tileSize, (y + 1) * tileSize);
-                    ctx.stroke();
-                }
-                if (y > 0 && maze[y - 1][x] === 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(x * tileSize, y * tileSize);
-                    ctx.lineTo((x + 1) * tileSize, y * tileSize);
-                    ctx.stroke();
-                }
+                ctx.fillStyle = "black"; // Small block walls
+                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
             }
         }
     }
-
-    ctx.setLineDash([]); // Reset to solid lines
 
     // Draw player
     ctx.fillStyle = "blue";
@@ -122,3 +106,4 @@ function checkWin() {
         document.getElementById("winMessage").style.display = "block";
     }
 }
+
