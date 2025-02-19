@@ -1,7 +1,7 @@
 body {
     margin: 0;
     overflow: hidden;
-    background: lightblue; /* Sky Color */
+    background: lightblue;
 }
 
 #game-container {
@@ -25,4 +25,5 @@ body {
     background: rgba(255, 255, 255, 0.7);
     border: 2px solid black;
 }
+
 
