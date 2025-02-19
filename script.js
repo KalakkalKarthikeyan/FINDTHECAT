@@ -120,11 +120,3 @@ function checkWin() {
     }
 }
 
-function changeBackground() {
-    let imageUrl = document.getElementById("bgImage").value;
-    if (imageUrl) {
-        document.body.style.backgroundImage = `url('${imageUrl}')`;
-    } else {
-        alert("Please enter a valid image URL!");
-    }
-}
