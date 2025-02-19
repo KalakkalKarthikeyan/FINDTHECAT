@@ -3,23 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find The Cat - Maze Game</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Find the Cat</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>🐱 Find The Cat 🐱</h1>
-    <p>Select a level:</p>
-    <button onclick="startGame('easy')">Easy</button>
-    <button onclick="startGame('normal')">Normal</button>
-    <button onclick="startGame('hard')">Hard</button>
-    <button onclick="startGame('vasanth')">Vasanth</button>
-    <br><br>
 
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
+    <div id="menu">
+        <h1>Find the Cat</h1>
+        <p>Choose a difficulty:</p>
+        <button onclick="startGame('easy')">Easy</button>
+        <button onclick="startGame('normal')">Normal</button>
+        <button onclick="startGame('hard')">Hard</button>
+        <button onclick="startGame('vasanth')">Vasanth</button>
     </div>
 
-    <p id="winMessage">🎉 You found the cat! 🎉</p>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="game-over">
+        <h2>You Found the Cat! 🐈</h2>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <!-- On-screen controls for mobile -->
+    <div id="controls">
+        <button id="up">⬆️</button>
+        <div>
+            <button id="left">⬅️</button>
+            <button id="down">⬇️</button>
+            <button id="right">➡️</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
