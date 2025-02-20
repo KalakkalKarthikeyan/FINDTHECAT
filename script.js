@@ -34,25 +34,39 @@ function startGame(difficulty) {
 }
 
 function generateMaze() {
-    // Create a full wall maze
+    // Create a full grid of walls (1s)
     maze = Array.from({ length: mazeSize }, () =>
         Array.from({ length: mazeSize }, () => 1)
     );
 
-    // Generate one correct path to the cat
-    let x = 1, y = 1;
-    maze[y][x] = 0;
+    function carvePath(x, y) {
+        let directions = [
+            { dx: 0, dy: -2 },
+            { dx: 0, dy: 2 },
+            { dx: -2, dy: 0 },
+            { dx: 2, dy: 0 }
+        ];
 
-    while (x < mazeSize - 2 || y < mazeSize - 2) {
-        if (Math.random() > 0.5 && x < mazeSize - 2) x++;
-        else if (y < mazeSize - 2) y++;
+        directions.sort(() => Math.random() - 0.5);
 
-        maze[y][x] = 0;
+        for (let { dx, dy } of directions) {
+            let nx = x + dx;
+            let ny = y + dy;
+
+            if (nx > 0 && nx < mazeSize - 1 && ny > 0 && ny < mazeSize - 1 && maze[ny][nx] === 1) {
+                maze[y + dy / 2][x + dx / 2] = 0;
+                maze[ny][nx] = 0;
+                carvePath(nx, ny);
+            }
+        }
     }
 
-    // Place the cat at the end of the path
-    cat.x = x;
-    cat.y = y;
+    maze[1][1] = 0;
+    carvePath(1, 1);
+
+    // Ensure a valid path to the cat
+    cat = { x: mazeSize - 2, y: mazeSize - 2 };
+    maze[cat.y][cat.x] = 0;
 }
 
 function drawMaze() {
@@ -65,12 +79,12 @@ function drawMaze() {
         ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
     }
 
-    // Draw maze walls using small black squares
+    // Draw maze walls (small black boxes)
     ctx.fillStyle = "black";
     for (let y = 0; y < mazeSize; y++) {
         for (let x = 0; x < mazeSize; x++) {
             if (maze[y][x] === 1) {
-                ctx.fillRect(x * tileSize, y * tileSize, tileSize / 3, tileSize / 3);
+                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
             }
         }
     }
@@ -116,4 +130,5 @@ function restartGame() {
     document.getElementById("menu").style.display = "block";
     canvas.style.display = "none";
 }
+
 
