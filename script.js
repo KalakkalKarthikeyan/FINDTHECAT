@@ -7,16 +7,16 @@ let maze = [];
 let mazeSize = 10;
 let tileSize = 40;
 let gameRunning = false;
-let autoSolving = true;
+let autoSolving = false;
 
 // Set your background image link here
 const backgroundImage = "your-image-link-here";
 
 const levelSettings = {
-    easy: { size: 30 },
-    normal: { size: 40 },
-    hard: { size: 50 },
-    vasanth: { size: 100 }
+    easy: { size: 40 },
+    normal: { size: 50 },
+    hard: { size: 60 },
+    vasanth: { size: 90 }
 };
 
 function startGame(difficulty) {
@@ -36,7 +36,6 @@ function startGame(difficulty) {
 }
 
 function generateMaze() {
-    // Create a full grid of walls (1s)
     maze = Array.from({ length: mazeSize }, () =>
         Array.from({ length: mazeSize }, () => 1)
     );
@@ -66,7 +65,6 @@ function generateMaze() {
     maze[1][1] = 0;
     carvePath(1, 1);
 
-    // Ensure a valid path to the cat
     cat = { x: mazeSize - 2, y: mazeSize - 2 };
     maze[cat.y][cat.x] = 0;
 }
@@ -74,12 +72,10 @@ function generateMaze() {
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background image
     let bg = new Image();
     bg.src = backgroundImage;
     ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 
-    // Draw maze walls (small black boxes)
     ctx.fillStyle = "black";
     for (let y = 0; y < mazeSize; y++) {
         for (let x = 0; x < mazeSize; x++) {
@@ -89,16 +85,13 @@ function drawMaze() {
         }
     }
 
-    // Draw player
     ctx.fillStyle = "blue";
     ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
 
-    // Draw cat (🐈)
     ctx.font = `${tileSize}px Arial`;
     ctx.fillText("🐈", cat.x * tileSize + 5, cat.y * tileSize + tileSize - 5);
 }
 
-// Movement controls
 document.addEventListener("keydown", movePlayer);
 
 function movePlayer(event) {
@@ -138,20 +131,53 @@ function checkWin() {
     }
 }
 
-// Pathfinding (automatic movement)
+// Pathfinding using BFS (Shortest Path)
 function autoSolve() {
     autoSolving = true;
+    let queue = [{ x: player.x, y: player.y, path: [] }];
+    let visited = Array.from({ length: mazeSize }, () => Array(mazeSize).fill(false));
+    visited[player.y][player.x] = true;
+
+    while (queue.length > 0) {
+        let { x, y, path } = queue.shift();
+
+        if (x === cat.x && y === cat.y) {
+            moveAutomatically(path);
+            return;
+        }
+
+        let directions = [
+            { dx: 0, dy: -1 },
+            { dx: 0, dy: 1 },
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 }
+        ];
+
+        for (let { dx, dy } of directions) {
+            let nx = x + dx;
+            let ny = y + dy;
+
+            if (nx >= 0 && nx < mazeSize && ny >= 0 && ny < mazeSize && maze[ny][nx] === 0 && !visited[ny][nx]) {
+                visited[ny][nx] = true;
+                queue.push({ x: nx, y: ny, path: [...path, { x: nx, y: ny }] });
+            }
+        }
+    }
+}
+
+// Move player along the found path
+function moveAutomatically(path) {
+    let index = 0;
     let interval = setInterval(() => {
-        if (!autoSolving || player.x === cat.x && player.y === cat.y) {
+        if (!autoSolving || index >= path.length) {
             clearInterval(interval);
             return;
         }
 
-        // Simple right/down strategy for now
-        if (player.x < cat.x) player.x++;
-        else if (player.y < cat.y) player.y++;
-
+        player.x = path[index].x;
+        player.y = path[index].y;
         drawMaze();
+        index++;
     }, 100);
 }
 
