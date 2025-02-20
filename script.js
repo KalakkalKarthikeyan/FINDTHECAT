@@ -12,10 +12,10 @@ let gameRunning = false;
 const backgroundImage = "your-image-link-here";
 
 const levelSettings = {
-    easy: { size: 10 },
-    normal: { size: 15 },
-    hard: { size: 20 },
-    vasanth: { size: 35 }
+    easy: { size: 15 },
+    normal: { size: 20 },
+    hard: { size: 30 },
+    vasanth: { size: 40 }
 };
 
 function startGame(difficulty) {
