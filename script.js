@@ -7,15 +7,16 @@ let maze = [];
 let mazeSize = 10;
 let tileSize = 40;
 let gameRunning = false;
+let autoSolving = false;
 
 // Set your background image link here
-const backgroundImage = "https://raw.githubusercontent.com/KalakkalKarthikeyan/FINDTHECAT/refs/heads/main/istockphoto-1397509122-612x612.jpg";
+const backgroundImage = "your-image-link-here";
 
 const levelSettings = {
-    easy: { size: 30 },
-    normal: { size: 40 },
-    hard: { size: 50 },
-    vasanth: { size: 70 }
+    easy: { size: 10 },
+    normal: { size: 20 },
+    hard: { size: 30 },
+    vasanth: { size: 50 }
 };
 
 function startGame(difficulty) {
@@ -26,6 +27,7 @@ function startGame(difficulty) {
 
     document.getElementById("menu").style.display = "none";
     canvas.style.display = "block";
+    document.getElementById("controls").style.display = "block";
 
     generateMaze();
     player = { x: 1, y: 1 };
@@ -34,6 +36,7 @@ function startGame(difficulty) {
 }
 
 function generateMaze() {
+    // Create a full grid of walls (1s)
     maze = Array.from({ length: mazeSize }, () =>
         Array.from({ length: mazeSize }, () => 1)
     );
@@ -63,12 +66,18 @@ function generateMaze() {
     maze[1][1] = 0;
     carvePath(1, 1);
 
+    // Ensure a valid path to the cat
     cat = { x: mazeSize - 2, y: mazeSize - 2 };
     maze[cat.y][cat.x] = 0;
 }
 
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw background image
+    let bg = new Image();
+    bg.src = backgroundImage;
+    ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 
     // Draw maze walls (small black boxes)
     ctx.fillStyle = "black";
@@ -89,18 +98,29 @@ function drawMaze() {
     ctx.fillText("🐈", cat.x * tileSize + 5, cat.y * tileSize + tileSize - 5);
 }
 
-document.addEventListener("keydown", (event) => move(event.key));
+// Movement controls
+document.addEventListener("keydown", movePlayer);
 
-function move(direction) {
+function movePlayer(event) {
     if (!gameRunning) return;
 
     let newX = player.x;
     let newY = player.y;
 
-    if (direction === "ArrowUp" || direction === "w") newY--;
-    if (direction === "ArrowDown" || direction === "s") newY++;
-    if (direction === "ArrowLeft" || direction === "a") newX--;
-    if (direction === "ArrowRight" || direction === "d") newX++;
+    if (event.key === "ArrowUp") newY--;
+    if (event.key === "ArrowDown") newY++;
+    if (event.key === "ArrowLeft") newX--;
+    if (event.key === "ArrowRight") newX++;
+
+    if (event.key === "Shift" && event.altKey && event.code === "KeyA") {
+        autoSolve();
+        return;
+    }
+
+    if (event.key === "Enter") {
+        autoSolving = false;
+        return;
+    }
 
     if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize && maze[newY][newX] === 0) {
         player.x = newX;
@@ -111,12 +131,6 @@ function move(direction) {
     checkWin();
 }
 
-// Mobile Controls
-document.getElementById("up").addEventListener("click", () => move("ArrowUp"));
-document.getElementById("down").addEventListener("click", () => move("ArrowDown"));
-document.getElementById("left").addEventListener("click", () => move("ArrowLeft"));
-document.getElementById("right").addEventListener("click", () => move("ArrowRight"));
-
 function checkWin() {
     if (player.x === cat.x && player.y === cat.y) {
         gameRunning = false;
@@ -124,8 +138,25 @@ function checkWin() {
     }
 }
 
-function restartGame() {
-    document.getElementById("game-over").style.display = "none";
-    document.getElementById("menu").style.display = "block";
-    canvas.style.display = "none";
+// Pathfinding (automatic movement)
+function autoSolve() {
+    autoSolving = true;
+    let interval = setInterval(() => {
+        if (!autoSolving || player.x === cat.x && player.y === cat.y) {
+            clearInterval(interval);
+            return;
+        }
+
+        // Simple right/down strategy for now
+        if (player.x < cat.x) player.x++;
+        else if (player.y < cat.y) player.y++;
+
+        drawMaze();
+    }, 100);
 }
+
+// Mobile Controls
+document.getElementById("up").addEventListener("click", () => movePlayer({ key: "ArrowUp" }));
+document.getElementById("down").addEventListener("click", () => movePlayer({ key: "ArrowDown" }));
+document.getElementById("left").addEventListener("click", () => movePlayer({ key: "ArrowLeft" }));
+document.getElementById("right").addEventListener("click", () => movePlayer({ key: "ArrowRight" }));
