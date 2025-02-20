@@ -1,39 +1,21 @@
-/* SET BACKGROUND IMAGE LINK HERE */
 body {
     text-align: center;
-    background-image: url('https://your-image-link-here.com/image.jpg'); /* Change this link */
-    background-size: cover;
-    background-position: center;
     font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
 }
 
-h1 {
-    margin-top: 10px;
+#menu, #game-over {
+    margin-top: 20px;
 }
 
 button {
-    padding: 10px;
-    font-size: 16px;
+    padding: 10px 20px;
     margin: 5px;
+    font-size: 16px;
     cursor: pointer;
 }
 
-#game-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-}
-
-#gameCanvas {
-    background: white;
+canvas {
+    display: none;
     border: 2px solid black;
 }
-
-#winMessage {
-    display: none;
-    font-size: 24px;
-    font-weight: bold;
-    color: green;
-    margin-top: 10px;
-}
-
