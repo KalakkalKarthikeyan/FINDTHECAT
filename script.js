@@ -7,10 +7,10 @@ let maze = [];
 let mazeSize = 10;
 let tileSize = 40;
 let gameRunning = false;
-let autoSolving = false;
+let monsters = [];
 
 // Set your background image link here
-const backgroundImage = "your-image-link-here";
+const backgroundImage = "https://raw.githubusercontent.com/KalakkalKarthikeyan/FINDTHECAT/refs/heads/main/istockphoto-1397509122-612x612.jpg";
 
 const levelSettings = {
     easy: { size: 40 },
@@ -39,6 +39,7 @@ function generateMaze() {
     maze = Array.from({ length: mazeSize }, () =>
         Array.from({ length: mazeSize }, () => 1)
     );
+    monsters = [];
 
     function carvePath(x, y) {
         let directions = [
@@ -47,7 +48,6 @@ function generateMaze() {
             { dx: -2, dy: 0 },
             { dx: 2, dy: 0 }
         ];
-
         directions.sort(() => Math.random() - 0.5);
 
         for (let { dx, dy } of directions) {
@@ -67,6 +67,24 @@ function generateMaze() {
 
     cat = { x: mazeSize - 2, y: mazeSize - 2 };
     maze[cat.y][cat.x] = 0;
+
+    // Place monsters in dead ends
+    function isDeadEnd(x, y) {
+        let paths = 0;
+        if (x > 0 && maze[y][x - 1] === 0) paths++;
+        if (x < mazeSize - 1 && maze[y][x + 1] === 0) paths++;
+        if (y > 0 && maze[y - 1][x] === 0) paths++;
+        if (y < mazeSize - 1 && maze[y + 1][x] === 0) paths++;
+        return paths === 1; 
+    }
+
+    for (let y = 1; y < mazeSize - 1; y++) {
+        for (let x = 1; x < mazeSize - 1; x++) {
+            if (maze[y][x] === 0 && isDeadEnd(x, y) && Math.random() > 0.5) {
+                monsters.push({ x, y });
+            }
+        }
+    }
 }
 
 function drawMaze() {
@@ -85,10 +103,17 @@ function drawMaze() {
         }
     }
 
-    ctx.fillStyle = "blue";
-    ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
-
     ctx.font = `${tileSize}px Arial`;
+
+    // Draw Monsters (👺)
+    monsters.forEach(monster => {
+        ctx.fillText("👺", monster.x * tileSize + 5, monster.y * tileSize + tileSize - 5);
+    });
+
+    // Draw Player (🧍)
+    ctx.fillText("🧍", player.x * tileSize + 5, player.y * tileSize + tileSize - 5);
+
+    // Draw Cat (🐈)
     ctx.fillText("🐈", cat.x * tileSize + 5, cat.y * tileSize + tileSize - 5);
 }
 
@@ -105,20 +130,18 @@ function movePlayer(event) {
     if (event.key === "ArrowLeft") newX--;
     if (event.key === "ArrowRight") newX++;
 
-    if (event.key === "Shift" && event.altKey && event.code === "KeyA") {
-        autoSolve();
-        return;
-    }
-
-    if (event.key === "Enter") {
-        autoSolving = false;
-        return;
-    }
-
     if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize && maze[newY][newX] === 0) {
         player.x = newX;
         player.y = newY;
     }
+
+    // Check if player touches a monster
+    monsters.forEach(monster => {
+        if (player.x === monster.x && player.y === monster.y) {
+            alert("👺 A monster got you! Restarting...");
+            restartGame();
+        }
+    });
 
     drawMaze();
     checkWin();
@@ -131,54 +154,8 @@ function checkWin() {
     }
 }
 
-// Pathfinding using BFS (Shortest Path)
-function autoSolve() {
-    autoSolving = true;
-    let queue = [{ x: player.x, y: player.y, path: [] }];
-    let visited = Array.from({ length: mazeSize }, () => Array(mazeSize).fill(false));
-    visited[player.y][player.x] = true;
-
-    while (queue.length > 0) {
-        let { x, y, path } = queue.shift();
-
-        if (x === cat.x && y === cat.y) {
-            moveAutomatically(path);
-            return;
-        }
-
-        let directions = [
-            { dx: 0, dy: -1 },
-            { dx: 0, dy: 1 },
-            { dx: -1, dy: 0 },
-            { dx: 1, dy: 0 }
-        ];
-
-        for (let { dx, dy } of directions) {
-            let nx = x + dx;
-            let ny = y + dy;
-
-            if (nx >= 0 && nx < mazeSize && ny >= 0 && ny < mazeSize && maze[ny][nx] === 0 && !visited[ny][nx]) {
-                visited[ny][nx] = true;
-                queue.push({ x: nx, y: ny, path: [...path, { x: nx, y: ny }] });
-            }
-        }
-    }
-}
-
-// Move player along the found path
-function moveAutomatically(path) {
-    let index = 0;
-    let interval = setInterval(() => {
-        if (!autoSolving || index >= path.length) {
-            clearInterval(interval);
-            return;
-        }
-
-        player.x = path[index].x;
-        player.y = path[index].y;
-        drawMaze();
-        index++;
-    }, 100);
+function restartGame() {
+    location.reload();
 }
 
 // Mobile Controls
