@@ -16,7 +16,7 @@ const levelSettings = {
     easy: { size: 40 },
     normal: { size: 50 },
     hard: { size: 60 },
-    vasanth: { size: 90 }
+    vasanth: { size: 85 }
 };
 
 function startGame(difficulty) {
