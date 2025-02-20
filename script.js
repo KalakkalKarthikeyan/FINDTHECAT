@@ -9,13 +9,13 @@ let tileSize = 40;
 let gameRunning = false;
 
 // Set your background image link here
-const backgroundImage = "your-image-link-here";
+const backgroundImage = "https://raw.githubusercontent.com/KalakkalKarthikeyan/FINDTHECAT/refs/heads/main/istockphoto-1397509122-612x612.jpg";
 
 const levelSettings = {
-    easy: { size: 15 },
-    normal: { size: 20 },
-    hard: { size: 30 },
-    vasanth: { size: 40 }
+    easy: { size: 30 },
+    normal: { size: 40 },
+    hard: { size: 50 },
+    vasanth: { size: 70 }
 };
 
 function startGame(difficulty) {
