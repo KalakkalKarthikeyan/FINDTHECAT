@@ -34,7 +34,6 @@ function startGame(difficulty) {
 }
 
 function generateMaze() {
-    // Create a full grid of walls (1s)
     maze = Array.from({ length: mazeSize }, () =>
         Array.from({ length: mazeSize }, () => 1)
     );
@@ -64,20 +63,12 @@ function generateMaze() {
     maze[1][1] = 0;
     carvePath(1, 1);
 
-    // Ensure a valid path to the cat
     cat = { x: mazeSize - 2, y: mazeSize - 2 };
     maze[cat.y][cat.x] = 0;
 }
 
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw background image
-    if (backgroundImage) {
-        let bg = new Image();
-        bg.src = backgroundImage;
-        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
-    }
 
     // Draw maze walls (small black boxes)
     ctx.fillStyle = "black";
@@ -98,16 +89,18 @@ function drawMaze() {
     ctx.fillText("🐈", cat.x * tileSize + 5, cat.y * tileSize + tileSize - 5);
 }
 
-document.addEventListener("keydown", (event) => {
+document.addEventListener("keydown", (event) => move(event.key));
+
+function move(direction) {
     if (!gameRunning) return;
 
     let newX = player.x;
     let newY = player.y;
 
-    if (event.key === "ArrowUp") newY--;
-    if (event.key === "ArrowDown") newY++;
-    if (event.key === "ArrowLeft") newX--;
-    if (event.key === "ArrowRight") newX++;
+    if (direction === "ArrowUp" || direction === "w") newY--;
+    if (direction === "ArrowDown" || direction === "s") newY++;
+    if (direction === "ArrowLeft" || direction === "a") newX--;
+    if (direction === "ArrowRight" || direction === "d") newX++;
 
     if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize && maze[newY][newX] === 0) {
         player.x = newX;
@@ -116,7 +109,13 @@ document.addEventListener("keydown", (event) => {
 
     drawMaze();
     checkWin();
-});
+}
+
+// Mobile Controls
+document.getElementById("up").addEventListener("click", () => move("ArrowUp"));
+document.getElementById("down").addEventListener("click", () => move("ArrowDown"));
+document.getElementById("left").addEventListener("click", () => move("ArrowLeft"));
+document.getElementById("right").addEventListener("click", () => move("ArrowRight"));
 
 function checkWin() {
     if (player.x === cat.x && player.y === cat.y) {
@@ -130,5 +129,3 @@ function restartGame() {
     document.getElementById("menu").style.display = "block";
     canvas.style.display = "none";
 }
-
-
