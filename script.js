@@ -9,13 +9,13 @@ let tileSize = 40;
 let gameRunning = false;
 
 // Set your background image link here
-const backgroundImage = "your-image-link-here";  
+const backgroundImage = "your-image-link-here";
 
 const levelSettings = {
-    easy: { size: 10, trapCat: true },
-    normal: { size: 15, trapCat: false },
-    hard: { size: 20, trapCat: true },
-    vasanth: { size: 35, trapCat: false }
+    easy: { size: 10 },
+    normal: { size: 15 },
+    hard: { size: 20 },
+    vasanth: { size: 35 }
 };
 
 function startGame(difficulty) {
@@ -23,69 +23,54 @@ function startGame(difficulty) {
     tileSize = Math.min(600 / mazeSize, 40);
     canvas.width = mazeSize * tileSize;
     canvas.height = mazeSize * tileSize;
-    
+
     document.getElementById("menu").style.display = "none";
     canvas.style.display = "block";
 
-    generateMaze(levelSettings[difficulty].trapCat);
+    generateMaze();
     player = { x: 1, y: 1 };
     gameRunning = true;
     drawMaze();
 }
 
-function generateMaze(trapCat) {
-    // Create random maze
+function generateMaze() {
+    // Create a full wall maze
     maze = Array.from({ length: mazeSize }, () =>
-        Array.from({ length: mazeSize }, () => (Math.random() > 0.3 ? 0 : 1))
+        Array.from({ length: mazeSize }, () => 1)
     );
 
-    // Ensure player start position is open
-    maze[1][1] = 0;
+    // Generate one correct path to the cat
+    let x = 1, y = 1;
+    maze[y][x] = 0;
 
-    // Place the cat
-    if (trapCat) {
-        let cx = Math.floor(mazeSize / 2);
-        let cy = Math.floor(mazeSize / 2);
-        maze[cx][cy] = 0;
-        cat = { x: cx, y: cy };
+    while (x < mazeSize - 2 || y < mazeSize - 2) {
+        if (Math.random() > 0.5 && x < mazeSize - 2) x++;
+        else if (y < mazeSize - 2) y++;
 
-        // Surround the cat with walls
-        maze[cx - 1][cy] = 1;
-        maze[cx + 1][cy] = 1;
-        maze[cx][cy - 1] = 1;
-        maze[cx][cy + 1] = 1;
-    } else {
-        cat.x = mazeSize - 2;
-        cat.y = mazeSize - 2;
-        maze[cat.y][cat.x] = 0;
+        maze[y][x] = 0;
     }
+
+    // Place the cat at the end of the path
+    cat.x = x;
+    cat.y = y;
 }
 
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background image first
+    // Draw background image
     if (backgroundImage) {
         let bg = new Image();
         bg.src = backgroundImage;
-        bg.onload = () => {
-            ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
-            drawMazeWalls();  // Ensure walls are drawn after background
-        };
-    } else {
-        drawMazeWalls(); // If no background, just draw walls
+        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
     }
-}
 
-// Function to draw walls
-function drawMazeWalls() {
-    ctx.strokeStyle = "black"; // Darker color for visibility
-    ctx.lineWidth = 3; // Thicker lines
-
+    // Draw maze walls using small black squares
+    ctx.fillStyle = "black";
     for (let y = 0; y < mazeSize; y++) {
         for (let x = 0; x < mazeSize; x++) {
             if (maze[y][x] === 1) {
-                ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                ctx.fillRect(x * tileSize, y * tileSize, tileSize / 3, tileSize / 3);
             }
         }
     }
