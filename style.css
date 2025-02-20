@@ -1,7 +1,9 @@
-body {
+body { 
     text-align: center;
     font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
+    background: url("https://raw.githubusercontent.com/KalakkalKarthikeyan/FINDTHECAT/refs/heads/main/istockphoto-1397509122-612x612.jpg") no-repeat center center fixed;
+    background-size: cover;
+    color: white;
 }
 
 #menu, #game-over {
@@ -9,13 +11,57 @@ body {
 }
 
 button {
-    padding: 10px 20px;
-    margin: 5px;
-    font-size: 16px;
+    padding: 12px 20px;
+    margin: 8px;
+    font-size: 18px;
     cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #3498db;
+    color: white;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
 }
 
 canvas {
     display: none;
-    border: 2px solid black;
+    border: 2px solid white;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+}
+
+/* Mobile Controls */
+#controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+#controls button {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    background-color: #2ecc71;
+    border-radius: 50%;
+    border: none;
+    color: white;
+}
+
+#controls button:active {
+    background-color: #27ae60;
+}
+
+/* Hide controls on desktop */
+@media screen and (min-width: 768px) {
+    #controls {
+        display: none;
+    }
 }
