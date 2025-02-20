@@ -7,16 +7,16 @@ let maze = [];
 let mazeSize = 10;
 let tileSize = 40;
 let gameRunning = false;
-let autoSolving = false;
+let autoSolving = true;
 
 // Set your background image link here
 const backgroundImage = "your-image-link-here";
 
 const levelSettings = {
-    easy: { size: 10 },
-    normal: { size: 20 },
-    hard: { size: 30 },
-    vasanth: { size: 50 }
+    easy: { size: 30 },
+    normal: { size: 40 },
+    hard: { size: 50 },
+    vasanth: { size: 100 }
 };
 
 function startGame(difficulty) {
